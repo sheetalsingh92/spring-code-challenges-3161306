@@ -89,4 +89,10 @@ public class CateringJobController {
     public Mono<String> getSurpriseImage() {
         return null;
     }
+
+    @ExceptionHandler(HttpClientErrorException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    String handleClientException(){
+        return "Not Found: Please try again";
+    }
 }
