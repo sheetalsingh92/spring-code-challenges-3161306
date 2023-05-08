@@ -1,6 +1,7 @@
 package com.cecilireid.springchallenges;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -48,12 +49,41 @@ public class CateringJobController {
         return cateringJobRepository.save(job);
     }
 
-    public CateringJob updateCateringJob(CateringJob cateringJob, Long id) {
-        return null;
+    @PutMapping("update/{id}")
+    public CateringJob updateCateringJob(@RequestBody CateringJob cateringJob, @PathVariable Long id) {
+        if(cateringJobRepository.existsById(id))
+        {
+            cateringJob.setId(id);
+            return cateringJobRepository.save(cateringJob);
+        }
+        else
+        {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+        }
+
     }
 
-    public CateringJob patchCateringJob(Long id, JsonNode json) {
-        return null;
+    @PatchMapping("/{id}")
+    @ResponseBody
+    public CateringJob patchCateringJob(@PathVariable Long id, @RequestBody JsonNode json) {
+        Optional<CateringJob> optionalJob =  cateringJobRepository.findById(id);
+        if(optionalJob.isPresent()){
+            CateringJob job = optionalJob.get();
+            JsonNode menu = json.get("menu");
+            if(menu != null)
+            {
+                job.setMenu(menu.asText());
+                return cateringJobRepository.save(job);
+            }
+            else
+            {
+                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+            }
+        }
+        else
+        {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+        }
     }
 
     public Mono<String> getSurpriseImage() {
